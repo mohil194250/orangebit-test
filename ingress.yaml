@@ -7,7 +7,7 @@ metadata:
 spec:
     ingressClassName: nginx
     rules:
-      - host: a7d50ea86c41f4602906315da2d24a75-1308239132.us-west-2.elb.amazonaws.com
+      - host: aman.orangebitindia.com
         http:
           paths:
             - pathType: Prefix
