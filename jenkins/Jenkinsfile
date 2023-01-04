@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+    parameters {
+         gitParameter branchFilter: 'origin/feature/(.*)', defaultValue: '', name: 'BRANCH', type: 'PT_BRANCH'
+    }
+    stages {
+        stage ('build') {
+            steps {
+                sh "sed -ie 's,WEB,${params.BRANCH},g' index.html"
+                sh "sudo docker build -t humancloudak/k8-poc ."
+                sh "sudo docker tag humancloudak/k8-poc:latest humancloudak/k8-poc:${params.BRANCH}.${BUILD_ID}"
+                sh "sudo docker push humancloudak/k8-poc:${params.BRANCH}.${BUILD_ID}"
+                
+            }
+        }
+        stage ('Deploy') {
+            steps {
+                
+                sh "aws eks update-kubeconfig --region us-west-2 --name eks-test-cluster"
+                sh "chmod +x namespacecheck.sh; bash -x namespacecheck.sh ${params.BRANCH}-demo2"             
+                sh "helm upgrade --install oragebitdemo-${params.BRANCH} oragne-bit-demo/ --set image.repository=humancloudak/k8-poc --set image.tag=${params.BRANCH}.${BUILD_ID} -n ${params.BRANCH}-demo2"
+                sh "NAMESPACE=${params.BRANCH}"
+                sh "sed -ie 's,NAMESPACE,${params.BRANCH},g' ingress.yaml"
+                sh "kubectl apply -f ingress.yaml -n ${params.BRANCH}-demo2"
+            }
+        }
+        
+    }
+    
+}
