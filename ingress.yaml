@@ -16,6 +16,6 @@ spec:
                   name: oragebitdemo-NAMESPACE-oragne-bit-demo
                   port:
                     number: 80
-              path: /demo2/NAMESPACE
+              path: /NAMESPACE
               
               
